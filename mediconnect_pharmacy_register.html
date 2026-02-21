@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Registration - MediConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/mediconnect.css">
+    <link rel="stylesheet" href="css/mediconnect_custom.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        #alert-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        .alert-floating {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .card {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: none;
+        }
+
+        .card-body {
+            padding: 3rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #eb3349;
+            box-shadow: 0 0 0 0.2rem rgba(235, 51, 73, 0.25);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        .register-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.3);
+        }
+
+        .register-icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-label i {
+            color: #eb3349;
+            margin-right: 5px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .info-badge {
+            background: rgba(235, 51, 73, 0.1);
+            color: #eb3349;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #eb3349;
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .benefit-card i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat"></i> MediConnect
+            </a>
+        </div>
+    </nav>
+
+    <div id="alert-container"></div>
+
+    <div class="container">
+        <div class="row justify-content-center mt-4 mb-5">
+            <div class="col-md-10 col-lg-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="register-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <h3 class="text-center mb-3 fw-bold">Pharmacy Registration</h3>
+                        <p class="text-center text-muted mb-4">Register your pharmacy to manage medicine inventory</p>
+                        
+                        <div class="info-badge">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> After registration, you'll be able to add medicines, manage inventory, update stock levels, and make your medicines searchable for patients across the platform.
+                        </div>
+
+                        <form id="registerForm">
+                            <div class="row">
+                                <!-- Pharmacy Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="pharmacy_name" class="form-label required-field">
+                                        <i class="fas fa-store"></i>Pharmacy Name
+                                    </label>
+                                    <input type="text" class="form-control" id="pharmacy_name" name="pharmacy_name" placeholder="Enter pharmacy name" required>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label required-field">
+                                        <i class="fas fa-envelope"></i>Official Email
+                                    </label>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="pharmacy@example.com" required>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label required-field">
+                                        <i class="fas fa-lock"></i>Password
+                                    </label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Minimum 6 characters" required minlength="6">
+                                    <small class="form-text text-muted">At least 6 characters</small>
+                                </div>
+
+                                <!-- Phone -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label required-field">
+                                        <i class="fas fa-phone"></i>Contact Number
+                                    </label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="10 digit number" pattern="[0-9]{10}" required>
+                                    <small class="form-text text-muted">Primary contact number</small>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="col-12 mb-3">
+                                    <label for="address" class="form-label required-field">
+                                        <i class="fas fa-map-marker-alt"></i>Complete Address
+                                    </label>
+                                    <textarea class="form-control" id="address" rows="2" placeholder="Enter complete pharmacy address" required></textarea>
+                                </div>
+
+                                <!-- City -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="city" class="form-label required-field">
+                                        <i class="fas fa-city"></i>City
+                                    </label>
+                                    <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" required>
+                                </div>
+
+                                <!-- State -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="state" class="form-label required-field">
+                                        <i class="fas fa-map"></i>State
+                                    </label>
+                                    <input type="text" class="form-control" id="state" name="state" placeholder="Enter state" required>
+                                </div>
+
+                                <!-- Pincode -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="pincode" class="form-label required-field">
+                                        <i class="fas fa-map-pin"></i>Pincode
+                                    </label>
+                                    <input type="text" class="form-control" id="pincode" name="pincode" placeholder="6 digits" pattern="[0-9]{6}" required>
+                                </div>
+
+                                <!-- License Number -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="license_number" class="form-label">
+                                        <i class="fas fa-id-card"></i>License Number
+                                    </label>
+                                    <input type="text" class="form-control" id="license_number" name="license_number" placeholder="Pharmacy license number">
+                                    <small class="form-text text-muted">Optional - Drug license ID</small>
+                                </div>
+
+                                <!-- Operating Hours -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="operating_hours" class="form-label">
+                                        <i class="fas fa-clock"></i>Operating Hours
+                                    </label>
+                                    <input type="text" class="form-control" id="operating_hours" name="operating_hours" placeholder="e.g., 9:00 AM - 9:00 PM">
+                                    <small class="form-text text-muted">Optional - Business hours</small>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-danger btn-lg w-100">
+                                    <i class="fas fa-pills me-2"></i>Register Pharmacy
+                                </button>
+                            </div>
+                        </form>
+                            <p class="mb-2">Already registered? <a href="/pharmacy-login" class="fw-bold text-decoration-none link-highlight">Login here</a></p>
+                            <a href="/" class="text-muted text-decoration-none">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefits Section -->
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="benefit-card text-center">
+                            <i class="fas fa-capsules"></i>
+                            <h6 class="fw-bold">Manage Medicines</h6>
+                            <small>Add & update medicine inventory</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="benefit-card text-center">
+                            <i class="fas fa-chart-line"></i>
+                            <h6 class="fw-bold">Track Stock</h6>
+                            <small>Monitor stock levels in real-time</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="benefit-card text-center">
+                            <i class="fas fa-users"></i>
+                            <h6 class="fw-bold">Reach Patients</h6>
+                            <small>Become searchable by patients</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API Configuration
+        const API_URL = 'http://localhost:5000/';
+
+        // Show Alert Function
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Phone validation
+        function validatePhone(phone) {
+            const re = /^[0-9]{10}$/;
+            return re.test(phone);
+        }
+
+        // Pincode validation
+        function validatePincode(pincode) {
+            const re = /^[0-9]{6}$/;
+            return re.test(pincode);
+        }
+
+        // Register Form Submit Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value;
+            const pincode = document.getElementById('pincode').value;
+
+            // Validation
+            if (!validateEmail(email)) {
+                showAlert('Please enter a valid email address', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('Password must be at least 6 characters long', 'warning');
+                return;
+            }
+
+            if (!validatePhone(phone)) {
+                showAlert('Phone number must be 10 digits', 'warning');
+                return;
+            }
+
+            if (!validatePincode(pincode)) {
+                showAlert('Pincode must be 6 digits', 'warning');
+                return;
+            }
+
+            // Prepare form data
+            const formData = {
+                pharmacy_name: document.getElementById('pharmacy_name').value,
+                email: email,
+                password: password,
+                phone: phone,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                pincode: pincode,
+                license_number: document.getElementById('license_number').value,
+                operating_hours: document.getElementById('operating_hours').value
+            };
+
+            // Disable submit button to prevent double submission
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registering Pharmacy...';
+
+            try {
+                const response = await fetch(`${API_URL}api/pharmacies/register`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Pharmacy registered successfully! Redirecting to login page...', 'success');
+                    
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/pharmacy-login';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Registration failed. Please try again.', 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert('Unable to connect to server. Please try again later.', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            
+            if (token && userType === 'pharmacy') {
+                showAlert('You are already registered and logged in. Redirecting...', 'info');
+                setTimeout(() => {
+                    window.location.href = '/pharmacy-dashboard';
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>

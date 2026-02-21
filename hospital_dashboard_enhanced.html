@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Dashboard - MediConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        #alert-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        .alert-floating {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #0d7a6f 0%, #2bc962 100%);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .nav-tabs .nav-link {
+            color: #495057;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #11998e;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/hospital-dashboard">
+                <i class="fas fa-heartbeat"></i> MediConnect
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <span class="text-white me-3">
+                    <i class="fas fa-hospital me-2"></i>
+                    <span id="userName"></span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="alert-container"></div>
+
+    <div class="dashboard-header">
+        <div class="container">
+            <h2 class="mb-0"><i class="fas fa-hospital-user me-2"></i>Hospital Dashboard</h2>
+            <p class="mb-0 mt-2">Manage doctors, appointments, and hospital operations</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="doctors-tab" data-bs-toggle="tab" data-bs-target="#doctorsTab" type="button" role="tab" aria-controls="doctorsTab" aria-selected="true">
+                    <i class="fas fa-user-md"></i> Doctors Management
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointmentsTab" type="button" role="tab" aria-controls="appointmentsTab" aria-selected="false">
+                    <i class="fas fa-calendar-check"></i> Appointments
+                </button>
+            </li>
+        </ul>
+
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Doctors Tab -->
+            <div class="tab-pane fade show active" id="doctorsTab">
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Doctors</h6>
+                                    <h3 class="mb-0" id="totalDoctors">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Available</h6>
+                                    <h3 class="mb-0" id="availableDoctors">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                                    <i class="fas fa-stethoscope"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Specializations</h6>
+                                    <h3 class="mb-0" id="specializations">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4><i class="fas fa-users me-2"></i>Doctors List</h4>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDoctorModal">
+                        <i class="fas fa-plus me-2"></i>Add New Doctor
+                    </button>
+                </div>
+
+                <div id="doctorsList"></div>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div class="tab-pane fade" id="appointmentsTab">
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Total</h6>
+                                    <h3 class="mb-0" id="totalAppointments">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Pending</h6>
+                                    <h3 class="mb-0" id="pendingAppointments">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Confirmed</h6>
+                                    <h3 class="mb-0" id="confirmedAppointments">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                                    <i class="fas fa-check-double"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-1">Completed</h6>
+                                    <h3 class="mb-0" id="completedAppointments">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Filter Appointments</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="appointmentStatusFilter" class="form-label">Filter by Status</label>
+                                <select class="form-select" id="appointmentStatusFilter" aria-describedby="statusHelp">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            <div id="statusHelp" class="form-text">Select appointment status to filter results.</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="appointmentDoctorFilter" class="form-label">Filter by Doctor</label>
+                                <select class="form-select" id="appointmentDoctorFilter">
+                                    <option value="">All Doctors</option>
+                                </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="appointmentDateFilter" class="form-label">Filter by Date</label>
+                            <input type="date" class="form-control" id="appointmentDateFilter">
+                        </div>
+                    </div>
+                </div>
+             <div id="appointmentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Doctor Modal (keep existing modal code from original file) -->
+    <div class="modal fade" id="addDoctorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add New Doctor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDoctorForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Dr. John Doe" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Specialization *</label>
+                                <input type="text" class="form-control" id="specialization" name="specialization" placeholder="e.g., Cardiologist" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Qualification</label>
+                                <input type="text" class="form-control" id="qualification" name="qualification" placeholder="MBBS, MD">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Experience (Years)</label>
+                                <input type="number" class="form-control" id="experience_years" name="experience_years" placeholder="10" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="9876543210">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="doctor@example.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Consultation Fee (₹)</label>
+                                <input type="number" class="form-control" id="consultation_fee" name="consultation_fee" placeholder="500" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" class="form-control" id="room_number" name="room_number" placeholder="101">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label" for="available_days">Available Days</label>
+                                <input type="text" class="form-control" id="available_days" name="available_days" placeholder="Mon,Tue,Wed,Thu,Fri" title="Available days (comma-separated)" aria-label="Available days">
+                                <small class="text-muted">Comma-separated days</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="available_time_from">Available From</label>
+                                <input type="time" class="form-control" id="available_time_from" name="available_time_from" placeholder="09:00" title="Available from time (HH:MM)" aria-label="Available from time">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="available_time_to">Available To</label>
+                                <input type="time" class="form-control" id="available_time_to" name="available_time_to" placeholder="17:00" title="Available to time (HH:MM)" aria-label="Available to time">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-plus me-2"></i>Add Doctor
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Doctor Modal (similar structure) -->
+    <div class="modal fade" id="editDoctorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Doctor Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDoctorForm">
+                        <input type="hidden" id="edit_doctor_id" name="edit_doctor_id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_full_name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="edit_full_name" name="edit_full_name" required placeholder="Dr. John Doe" title="Full name of the doctor">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_specialization" class="form-label">Specialization *</label>
+                                <input type="text" class="form-control" id="edit_specialization" name="edit_specialization" required placeholder="e.g., Cardiologist" title="Specialization (e.g., Cardiologist)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_qualification" class="form-label">Qualification</label>
+                                <input type="text" class="form-control" id="edit_qualification" name="edit_qualification" placeholder="e.g., MBBS, MD" title="Qualification (degrees)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_experience_years" class="form-label">Experience (Years)</label>
+                                <input type="number" class="form-control" id="edit_experience_years" name="edit_experience_years" min="0" placeholder="e.g., 10" title="Experience in years" aria-label="Experience (years)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="edit_phone" name="edit_phone" placeholder="9876543210" title="Phone number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="edit_email" name="edit_email" placeholder="doctor@example.com" title="Email address">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_consultation_fee" class="form-label">Consultation Fee (₹)</label>
+                                <input type="number" class="form-control" id="edit_consultation_fee" name="edit_consultation_fee" step="0.01" min="0" placeholder="500" title="Consultation fee in ₹" aria-label="Consultation fee in rupees">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_room_number" class="form-label">Room Number</label>
+                                <input type="text" class="form-control" id="edit_room_number" name="edit_room_number" placeholder="e.g., 101" title="Room number where the doctor is available">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="edit_available_days" class="form-label">Available Days</label>
+                                <input type="text" class="form-control" id="edit_available_days" name="edit_available_days" placeholder="Mon,Tue,Wed,Thu,Fri" title="Available days (comma-separated)" aria-label="Edit available days">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_available_time_from" class="form-label">Available From</label>
+                                <input type="time" class="form-control" id="edit_available_time_from" name="edit_available_time_from" placeholder="09:00" title="Available from time (HH:MM)" aria-label="Edit available from time">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_available_time_to" class="form-label">Available To</label>
+                                <input type="time" class="form-control" id="edit_available_time_to" name="edit_available_time_to" placeholder="17:00" title="Available to time (HH:MM)" aria-label="Edit available to time">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label" for="edit_is_available">Availability Status</label>
+                                <select class="form-select" id="edit_is_available" name="edit_is_available">
+                                    <option value="true">Available</option>
+                                    <option value="false">Not Available</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save me-2"></i>Update Doctor
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Appointment Modal -->
+    <div class="modal fade" id="editDoctorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Doctor Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDoctorForm">
+                        <input type="hidden" id="edit_doctor_id" name="edit_doctor_id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="edit_full_name" name="edit_full_name" required placeholder="Dr. John Doe" title="Full name of the doctor">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Specialization *</label>
+                                <input type="text" class="form-control" id="edit_specialization" name="edit_specialization" required placeholder="e.g., Cardiologist" title="Specialization (e.g., Cardiologist)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Qualification</label>
+                                <input type="text" class="form-control" id="edit_qualification" name="edit_qualification" placeholder="e.g., MBBS, MD" title="Qualification (degrees)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Experience (Years)</label>
+                                <input type="number" class="form-control" id="edit_experience_years" name="edit_experience_years" min="0" placeholder="e.g., 10" title="Experience in years" aria-label="Experience (years)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="edit_phone">Phone</label>
+                                <input type="tel" class="form-control" id="edit_phone" name="edit_phone" placeholder="9876543210" title="Phone number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="edit_email">Email</label>
+                                <input type="email" class="form-control" id="edit_email" name="edit_email" placeholder="doctor@example.com" title="Email address">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="edit_consultation_fee">Consultation Fee (₹)</label>
+                                <input type="number" class="form-control" id="edit_consultation_fee" name="edit_consultation_fee" step="0.01" min="0" placeholder="500" title="Consultation fee in ₹" aria-label="Consultation fee in rupees">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="edit_room_number">Room Number</label>
+                                <input type="text" class="form-control" id="edit_room_number" name="edit_room_number" placeholder="e.g., 101" title="Room number where the doctor is available">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label" for="edit_available_days">Available Days</label>
+                                <input type="text" class="form-control" id="edit_available_days" name="edit_available_days" placeholder="Mon,Tue,Wed,Thu,Fri" title="Available days (comma-separated)" aria-label="Edit available days">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="edit_available_time_from">Available From</label>
+                                <input type="time" class="form-control" id="edit_available_time_from" name="edit_available_time_from" placeholder="09:00" title="Available from time (HH:MM)" aria-label="Edit available from time">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="edit_available_time_to">Available To</label>
+                                <input type="time" class="form-control" id="edit_available_time_to" name="edit_available_time_to" placeholder="17:00" title="Available to time (HH:MM)" aria-label="Edit available to time">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label" for="edit_is_available">Availability Status</label>
+                                <select class="form-select" id="edit_is_available" name="edit_is_available">
+                                    <option value="true">Available</option>
+                                    <option value="false">Not Available</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save me-2"></i>Update Doctor
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000/';
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            alertContainer.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        function checkAuth(requiredUserType) {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            if (!token || (requiredUserType && userType !== requiredUserType)) {
+                localStorage.clear();
+                window.location.href = '/';
+                return false;
+            }
+            return true;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = '/';
+            }
+        }
+
+        checkAuth('hospital');
+        document.getElementById('userName').textContent = localStorage.getItem('userName') || 'Hospital';
+
+        loadDoctors();
+        loadDoctorsFilter();
+
+        // Doctor Management Code (from original file)
+        document.getElementById('addDoctorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                full_name: document.getElementById('full_name').value,
+                specialization: document.getElementById('specialization').value,
+                qualification: document.getElementById('qualification').value,
+                experience_years: document.getElementById('experience_years').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                consultation_fee: document.getElementById('consultation_fee').value,
+                available_days: document.getElementById('available_days').value,
+                available_time_from: document.getElementById('available_time_from').value,
+                available_time_to: document.getElementById('available_time_to').value,
+                room_number: document.getElementById('room_number').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/doctors`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Doctor added successfully!', 'success');
+                    document.getElementById('addDoctorForm').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('addDoctorModal')).hide();
+                    loadDoctors();
+                    loadDoctorsFilter();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to add doctor', 'danger');
+            }
+        });
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/doctors`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayDoctors(data.data);
+                    updateDoctorStatistics(data.data);
+                }
+            } catch (error) {
+                showAlert('Failed to load doctors', 'danger');
+            }
+        }
+
+        function updateDoctorStatistics(doctors) {
+            const totalDoctors = doctors.length;
+            const availableDoctors = doctors.filter(d => d.is_available).length;
+            const uniqueSpecializations = new Set(doctors.map(d => d.specialization)).size;
+
+            document.getElementById('totalDoctors').textContent = totalDoctors;
+            document.getElementById('availableDoctors').textContent = availableDoctors;
+            document.getElementById('specializations').textContent = uniqueSpecializations;
+        }
+
+        function displayDoctors(doctors) {
+            if (doctors.length === 0) {
+                document.getElementById('doctorsList').innerHTML = '<div class="alert alert-info">No doctors added yet</div>';
+                return;
+            }
+
+            let html = '<div class="row">';
+            doctors.forEach(doctor => {
+                html += `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                        <i class="fas fa-user-md"></i>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary me-1" onclick="editDoctor(${doctor.doctor_id})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${doctor.doctor_id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <h5 class="card-title">${doctor.full_name}</h5>
+                                <p class="mb-1"><strong>${doctor.specialization}</strong></p>
+                                <p class="mb-1 small">${doctor.qualification || 'N/A'}</p>
+                                <p class="mb-1 small"><i class="fas fa-briefcase"></i> ${doctor.experience_years || 'N/A'} years</p>
+                                <p class="mb-1 small"><i class="fas fa-rupee-sign"></i> ₹${doctor.consultation_fee || 'N/A'}</p>
+                                <p class="mb-1 small"><i class="fas fa-calendar"></i> ${doctor.available_days || 'N/A'}</p>
+                                <p class="mb-1 small"><i class="fas fa-clock"></i> ${doctor.available_time_from || 'N/A'} - ${doctor.available_time_to || 'N/A'}</p>
+                                ${doctor.is_available ? '<span class="badge bg-success">Available</span>' : '<span class="badge bg-secondary">Not Available</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('doctorsList').innerHTML = html;
+        }
+
+        async function editDoctor(doctorId) {
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/doctors`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+                const doctor = data.data.find(d => d.doctor_id === doctorId);
+
+                if (doctor) {
+                    document.getElementById('edit_doctor_id').value = doctor.doctor_id;
+                    document.getElementById('edit_full_name').value = doctor.full_name;
+                    document.getElementById('edit_specialization').value = doctor.specialization;
+                    document.getElementById('edit_qualification').value = doctor.qualification || '';
+                    document.getElementById('edit_experience_years').value = doctor.experience_years || '';
+                    document.getElementById('edit_phone').value = doctor.phone || '';
+                    document.getElementById('edit_email').value = doctor.email || '';
+                    document.getElementById('edit_consultation_fee').value = doctor.consultation_fee || '';
+                    document.getElementById('edit_room_number').value = doctor.room_number || '';
+                    document.getElementById('edit_available_days').value = doctor.available_days || '';
+                    document.getElementById('edit_available_time_from').value = doctor.available_time_from || '';
+                    document.getElementById('edit_available_time_to').value = doctor.available_time_to || '';
+                    document.getElementById('edit_is_available').value = doctor.is_available.toString();
+
+                    new bootstrap.Modal(document.getElementById('editDoctorModal')).show();
+                }
+            } catch (error) {
+                showAlert('Failed to load doctor details', 'danger');
+            }
+        }
+
+        document.getElementById('editDoctorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const doctorId = document.getElementById('edit_doctor_id').value;
+            const formData = {
+                full_name: document.getElementById('edit_full_name').value,
+                specialization: document.getElementById('edit_specialization').value,
+                qualification: document.getElementById('edit_qualification').value,
+                experience_years: document.getElementById('edit_experience_years').value,
+                phone: document.getElementById('edit_phone').value,
+                email: document.getElementById('edit_email').value,
+                consultation_fee: document.getElementById('edit_consultation_fee').value,
+                available_days: document.getElementById('edit_available_days').value,
+                available_time_from: document.getElementById('edit_available_time_from').value,
+                available_time_to: document.getElementById('edit_available_time_to').value,
+                room_number: document.getElementById('edit_room_number').value,
+                is_available: document.getElementById('edit_is_available').value === 'true'
+            };
+
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/doctors/${doctorId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Doctor updated successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editDoctorModal')).hide();
+                    loadDoctors();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to update doctor', 'danger');
+            }
+        });
+
+        async function deleteDoctor(doctorId) {
+            if (!confirm('Are you sure you want to delete this doctor?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/doctors/${doctorId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Doctor deleted successfully!', 'success');
+                    loadDoctors();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to delete doctor', 'danger');
+            }
+        }
+
+        // Appointment Management
+        async function loadDoctorsFilter() {
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/doctors`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const select = document.getElementById('appointmentDoctorFilter');
+                    select.innerHTML = '<option value="">All Doctors</option>';
+                    data.data.forEach(doctor => {
+                        select.innerHTML += `<option value="${doctor.doctor_id}">${doctor.full_name} - ${doctor.specialization}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load doctors filter');
+            }
+        }
+
+        async function loadAppointments() {
+            const status = document.getElementById('appointmentStatusFilter').value;
+            const doctor_id = document.getElementById('appointmentDoctorFilter').value;
+            const date = document.getElementById('appointmentDateFilter').value;
+
+            const queryParams = new URLSearchParams();
+            if (status) queryParams.append('status', status);
+            if (doctor_id) queryParams.append('doctor_id', doctor_id);
+            if (date) queryParams.append('date', date);
+
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/appointments?${queryParams}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayAppointments(data.data);
+                    updateAppointmentStatistics(data.data);
+                }
+            } catch (error) {
+                showAlert('Failed to load appointments', 'danger');
+            }
+        }
+
+        function updateAppointmentStatistics(appointments) {
+            const total = appointments.length;
+            const pending = appointments.filter(a => a.status === 'pending').length;
+            const confirmed = appointments.filter(a => a.status === 'confirmed').length;
+            const completed = appointments.filter(a => a.status === 'completed').length;
+
+            document.getElementById('totalAppointments').textContent = total;
+            document.getElementById('pendingAppointments').textContent = pending;
+            document.getElementById('confirmedAppointments').textContent = confirmed;
+            document.getElementById('completedAppointments').textContent = completed;
+        }
+
+        function displayAppointments(appointments) {
+            if (appointments.length === 0) {
+                document.getElementById('appointmentsList').innerHTML = '<div class="alert alert-info">No appointments found</div>';
+                return;
+            }
+
+            let html = '';
+            appointments.forEach(apt => {
+                const statusClass = apt.status === 'confirmed' ? 'success' : 
+                                  apt.status === 'cancelled' ? 'danger' : 
+                                  apt.status === 'completed' ? 'info' : 'warning';
+                
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-user text-primary"></i> ${apt.user_name}
+                                        <span class="status-badge bg-${statusClass} ms-2">${apt.status.toUpperCase()}</span>
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1 small"><i class="fas fa-user-md text-success"></i> <strong>Doctor:</strong> ${apt.doctor_name}</p>
+                                            <p class="mb-1 small"><i class="fas fa-stethoscope"></i> ${apt.specialization}</p>
+                                            <p class="mb-1 small"><i class="fas fa-door-open"></i> Room: ${apt.room_number || 'N/A'}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1 small"><i class="fas fa-calendar"></i> <strong>Date:</strong> ${new Date(apt.appointment_date).toLocaleDateString()}</p>
+                                            <p class="mb-1 small"><i class="fas fa-clock"></i> <strong>Time:</strong> ${apt.appointment_time}</p>
+                                            <p class="mb-1 small"><i class="fas fa-phone"></i> ${apt.user_phone}</p>
+                                            <p class="mb-1 small"><i class="fas fa-envelope"></i> ${apt.user_email}</p>
+                                        </div>
+                                    </div>
+                                    ${apt.symptoms ? `<p class="mb-1 mt-2 small"><i class="fas fa-notes-medical"></i> <strong>Symptoms:</strong> ${apt.symptoms}</p>` : ''}
+                                    ${apt.notes ? `<p class="mb-1 small text-muted"><strong>Notes:</strong> ${apt.notes}</p>` : ''}
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-primary" onclick="openUpdateAppointmentModal(${apt.appointment_id}, '${apt.user_name}', '${apt.doctor_name}', '${apt.appointment_date}', '${apt.appointment_time}', '${apt.status}', '${apt.notes || ''}')">
+                                        <i class="fas fa-edit"></i> Update Status
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('appointmentsList').innerHTML = html;
+        }
+
+        function openUpdateAppointmentModal(appointmentId, userName, doctorName, date, time, status, notes) {
+            document.getElementById('appointmentId').value = appointmentId;
+            document.getElementById('appointmentStatus').value = status;
+            document.getElementById('appointmentNotes').value = notes;
+            
+            document.getElementById('appointmentInfo').innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Patient:</strong> ${userName}<br>
+                    <strong>Doctor:</strong> ${doctorName}<br>
+                    <strong>Date:</strong> ${new Date(date).toLocaleDateString()}<br>
+                    <strong>Time:</strong> ${time}
+                </div>
+            `;
+            
+            new bootstrap.Modal(document.getElementById('updateAppointmentModal')).show();
+        }
+
+        document.getElementById('updateAppointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const appointmentId = document.getElementById('appointmentId').value;
+            const formData = {
+                status: document.getElementById('appointmentStatus').value,
+                notes: document.getElementById('appointmentNotes').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/appointments/${appointmentId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Appointment updated successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('updateAppointmentModal')).hide();
+                    loadAppointments();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to update appointment', 'danger');
+            }
+        });
+
+        // Load appointments when tab is switched
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', (e) => {
+                if (e.target.dataset.bsTarget === '#appointmentsTab') {
+                    loadAppointments();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

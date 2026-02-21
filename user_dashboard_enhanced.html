@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - MediConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        #alert-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        .alert-floating {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .card {
+            transition: transform 0.2s;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .time-slot {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-slot:hover {
+            transform: scale(1.05);
+        }
+
+        .time-slot.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border-color: #667eea !important;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/user-dashboard">
+                <i class="fas fa-heartbeat"></i> MediConnect
+            </a>
+            <div class="ms-auto">
+                <span class="text-white me-3" id="userName"></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="alert-container"></div>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">User Dashboard</h2>
+
+        <ul class="nav nav-tabs mb-4" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" 
+            id="doctors-tab" 
+            data-bs-toggle="tab" 
+            data-bs-target="#doctors" 
+            type="button" 
+            role="tab" 
+            aria-controls="doctors" 
+            aria-selected="true">
+      <i class="fas fa-user-md"></i> Search Doctors
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" 
+            id="medicines-tab" 
+            data-bs-toggle="tab" 
+            data-bs-target="#medicines" 
+            type="button" 
+            role="tab" 
+            aria-controls="medicines" 
+            aria-selected="false">
+      <i class="fas fa-pills"></i> Search Medicines
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" 
+            id="appointments-tab" 
+            data-bs-toggle="tab" 
+            data-bs-target="#appointments" 
+            type="button" 
+            role="tab" 
+            aria-controls="appointments" 
+            aria-selected="false">
+      <i class="fas fa-calendar-check"></i> My Appointments
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" 
+            id="orders-tab" 
+            data-bs-toggle="tab" 
+            data-bs-target="#orders" 
+            type="button" 
+            role="tab" 
+            aria-controls="orders" 
+            aria-selected="false">
+      <i class="fas fa-shopping-cart"></i> My Orders
+    </button>
+  </li>
+</ul>
+
+
+        <div class="tab-content">
+            <!-- Search Doctors Tab -->
+            <div class="tab-pane fade show active" id="doctors">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Search for Doctors</h5>
+                        <form id="searchDoctorsForm" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="doctor_specialization" placeholder="Specialization">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="doctor_city" placeholder="City">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="doctor_hospital" placeholder="Hospital Name">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search Doctors
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="doctorsResults"></div>
+            </div>
+
+            <!-- Search Medicines Tab -->
+            <div class="tab-pane fade" id="medicines">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Search for Medicines</h5>
+                        <form id="searchMedicinesForm" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="medicine_name" placeholder="Medicine Name">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="medicine_city" placeholder="City">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="medicine_category" placeholder="Category">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search Medicines
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="medicinesResults"></div>
+            </div>
+
+            <!-- My Appointments Tab -->
+            <div class="tab-pane fade" id="appointments">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>My Appointments</h5>
+                    <div>
+                        <div class="mb-2">
+  <label for="appointmentFilter" class="form-label form-label-sm">Filter Appointments</label>
+  <select class="form-select form-select-sm" id="appointmentFilter" onchange="loadAppointments()">
+    <option value="">All Appointments</option>
+    <option value="booked">Booked</option>
+    <option value="confirmed">Confirmed</option>
+    <option value="completed">Completed</option>
+    <option value="cancelled">Cancelled</option>
+  </select>
+</div>
+
+                    </div>
+                </div>
+                <div id="appointmentsList"></div>
+            </div>
+
+            <!-- My Orders Tab -->
+            <div class="tab-pane fade" id="orders">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>My Medicine Orders</h5>
+                    <div class="mb-2">
+  <label for="orderFilter" class="form-label form-label-sm">Filter Orders</label>
+  <select class="form-select form-select-sm" id="orderFilter" onchange="loadOrders()">
+    <option value="">All Orders</option>
+    <option value="pending">Pending</option>
+    <option value="confirmed">Confirmed</option>
+    <option value="processing">Processing</option>
+    <option value="delivered">Delivered</option>
+    <option value="cancelled">Cancelled</option>
+  </select>
+</div>
+
+                </div>
+                <div id="ordersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Appointment Modal -->
+    <div class="modal fade" id="bookAppointmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-plus"></i> Book Appointment</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close-modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="doctorInfo" class="mb-3"></div>
+                    <form id="bookAppointmentForm">
+                        <input type="hidden" id="selectedDoctorId">
+                        <div class="mb-3">
+                            <label for="appointmentDate" class="form-label">Select Date *</label>
+                            <input type="date" class="form-control" id="appointmentDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="checkAvailability()">
+                                <i class="fas fa-search"></i> Check Available Slots
+                            </button>
+                        </div>
+                        <div id="availabilityInfo" class="mb-3"></div>
+                        <div id="timeSlotsContainer" class="mb-3"></div>
+                        <div class="mb-3">
+                            <label for="symptoms" class="form-label">Symptoms / Reason for Visit</label>
+                            <textarea class="form-control" id="symptoms" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="appointmentNotes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="appointmentNotes" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="bookAppointmentBtn" disabled>
+                            <i class="fas fa-check"></i> Confirm Booking
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Medicine Modal -->
+    <div class="modal fade" id="orderMedicineModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-shopping-cart"></i> Order Medicine</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close-modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="medicineInfo" class="mb-3"></div>
+                    <form id="orderMedicineForm">
+                        <input type="hidden" id="selectedMedicineId">
+                        <input type="hidden" id="medicinePrice">
+                        <input type="hidden" id="maxStock">
+                        <div class="mb-3">
+                            <label for="orderQuantity" class="form-label">Quantity *</label>
+                            <input type="number" class="form-control" id="orderQuantity" min="1" required onchange="calculateTotal()">
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalPrice" class="form-label">Total Price</label>
+                            <input type="text" class="form-control" id="totalPrice" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deliveryAddress" class="form-label">Delivery Address *</label>
+                            <textarea class="form-control" id="deliveryAddress" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="orderNotes" class="form-label">Special Instructions</label>
+                            <textarea class="form-control" id="orderNotes" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-check"></i> Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000/';
+        let selectedTimeSlot = null;
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            alertContainer.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        function checkAuth(requiredUserType) {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            if (!token || (requiredUserType && userType !== requiredUserType)) {
+                localStorage.clear();
+                window.location.href = '/';
+                return false;
+            }
+            return true;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = '/';
+            }
+        }
+
+        checkAuth('user');
+        document.getElementById('userName').textContent = localStorage.getItem('userName') || 'User';
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('appointmentDate').setAttribute('min', today);
+
+        // Search Doctors
+        document.getElementById('searchDoctorsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const specialization = document.getElementById('doctor_specialization').value;
+            const city = document.getElementById('doctor_city').value;
+            const hospital_name = document.getElementById('doctor_hospital').value;
+
+            const queryParams = new URLSearchParams();
+            if (specialization) queryParams.append('specialization', specialization);
+            if (city) queryParams.append('city', city);
+            if (hospital_name) queryParams.append('hospital_name', hospital_name);
+
+            try {
+                const response = await fetch(`${API_URL}api/users/search/doctors?${queryParams}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    displayDoctors(data.data);
+                } else {
+                    document.getElementById('doctorsResults').innerHTML = '<div class="alert alert-warning">No doctors found</div>';
+                }
+            } catch (error) {
+                showAlert('Search failed', 'danger');
+            }
+        });
+
+        function displayDoctors(doctors) {
+            if (doctors.length === 0) {
+                document.getElementById('doctorsResults').innerHTML = '<div class="alert alert-info">No doctors found</div>';
+                return;
+            }
+
+            let html = '<div class="row">';
+            doctors.forEach(doctor => {
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-user-md text-primary"></i> ${doctor.full_name}</h5>
+                                <p class="mb-1"><strong>Specialization:</strong> ${doctor.specialization}</p>
+                                <p class="mb-1"><strong>Qualification:</strong> ${doctor.qualification || 'N/A'}</p>
+                                <p class="mb-1"><strong>Experience:</strong> ${doctor.experience_years || 'N/A'} years</p>
+                                <p class="mb-1"><strong>Hospital:</strong> ${doctor.hospital_name}</p>
+                                <p class="mb-1"><strong>Location:</strong> ${doctor.city}</p>
+                                <p class="mb-1"><strong>Fee:</strong> ₹${doctor.consultation_fee || 'N/A'}</p>
+                                <p class="mb-1"><strong>Days:</strong> ${doctor.available_days || 'N/A'}</p>
+                                <p class="mb-1"><strong>Time:</strong> ${doctor.available_time_from || 'N/A'} - ${doctor.available_time_to || 'N/A'}</p>
+                                <button class="btn btn-primary btn-sm mt-2" onclick="openBookingModal(${doctor.doctor_id}, '${doctor.full_name}', '${doctor.specialization}', '${doctor.hospital_name}')">
+                                    <i class="fas fa-calendar-plus"></i> Book Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('doctorsResults').innerHTML = html;
+        }
+
+        // Open Booking Modal
+        function openBookingModal(doctorId, doctorName, specialization, hospitalName) {
+            document.getElementById('selectedDoctorId').value = doctorId;
+            document.getElementById('doctorInfo').innerHTML = `
+                <div class="alert alert-info">
+                    <strong>${doctorName}</strong><br>
+                    ${specialization} | ${hospitalName}
+                </div>
+            `;
+            document.getElementById('availabilityInfo').innerHTML = '';
+            document.getElementById('timeSlotsContainer').innerHTML = '';
+            document.getElementById('bookAppointmentBtn').disabled = true;
+            selectedTimeSlot = null;
+            new bootstrap.Modal(document.getElementById('bookAppointmentModal')).show();
+        }
+
+        // Check Availability
+        async function checkAvailability() {
+            const doctorId = document.getElementById('selectedDoctorId').value;
+            const date = document.getElementById('appointmentDate').value;
+
+            if (!date) {
+                showAlert('Please select a date', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}api/users/appointments/check-availability?doctor_id=${doctorId}&date=${date}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    if (!data.available) {
+                        document.getElementById('availabilityInfo').innerHTML = `
+                            <div class="alert alert-warning">${data.message}</div>
+                        `;
+                        document.getElementById('timeSlotsContainer').innerHTML = '';
+                        return;
+                    }
+
+                    document.getElementById('availabilityInfo').innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>Available Slots:</strong> ${data.availableSlots.length} slots available on ${data.dayOfWeek}
+                        </div>
+                    `;
+
+                    displayTimeSlots(data.availableSlots);
+                }
+            } catch (error) {
+                showAlert('Failed to check availability', 'danger');
+            }
+        }
+
+        function displayTimeSlots(slots) {
+            if (slots.length === 0) {
+                document.getElementById('timeSlotsContainer').innerHTML = '<div class="alert alert-warning">No slots available</div>';
+                return;
+            }
+
+            let html = '<label class="form-label">Select Time Slot *</label><div class="row g-2">';
+            slots.forEach(slot => {
+                html += `
+                    <div class="col-md-3">
+                        <div class="btn btn-outline-primary time-slot w-100" onclick="selectTimeSlot('${slot}', this)">
+                            <i class="fas fa-clock"></i> ${slot}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('timeSlotsContainer').innerHTML = html;
+        }
+
+        function selectTimeSlot(slot, element) {
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedTimeSlot = slot;
+            document.getElementById('bookAppointmentBtn').disabled = false;
+        }
+
+        // Book Appointment
+        document.getElementById('bookAppointmentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+  
+  // DEBUG: Check all values BEFORE sending
+        const doctorid = document.getElementById('selectedDoctorId').value;
+        const appointmentdate = document.getElementById('appointmentDate').value;
+        const appointmenttime = selectedTimeSlot;  // From global variable
+        const symptoms = document.getElementById('symptoms').value;
+        const notes = document.getElementById('appointmentNotes').value;
+  
+        console.log('FORM DATA BEFORE SEND:', { 
+            doctorid, appointmentdate, appointmenttime, symptoms, notes 
+        });
+  
+  // VALIDATION
+        if (!doctorid || !appointmentdate || !appointmenttime) {
+            showAlert('Please select doctor, date, and time slot', 'warning');
+            return;
+        }
+  
+        const formData = {
+            doctorid: doctorid,
+            appointmentdate: appointmentdate,
+            appointmenttime: appointmenttime,
+            symptoms: symptoms,
+            notes: notes
+        };
+  
+        console.log('SENDING TO SERVER:', formData);
+  
+        try {
+            const response = await fetch(`${API_URL}api/users/appointments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(formData)
+        });
+    
+        const data = await response.json();
+        console.log('SERVER RESPONSE:', data);
+    
+        if (data.success) {
+            showAlert('Appointment booked successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('bookAppointmentModal')).hide();
+            document.getElementById('bookAppointmentForm').reset();
+            selectedTimeSlot = null;
+            loadAppointments();  // Refresh appointments list
+        } else {
+            showAlert(data.message, 'danger');
+        }
+        } catch (error) {
+            console.error('Booking error:', error);
+            showAlert('Failed to book appointment', 'danger');
+        }
+    });
+
+
+        // Load Appointments
+        async function loadAppointments() {
+            const status = document.getElementById('appointmentFilter').value;
+            const queryParams = status ? `?status=${status}` : '';
+
+            try {
+                const response = await fetch(`${API_URL}api/users/appointments${queryParams}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    displayAppointments(data.data);
+                }
+            } catch (error) {
+                showAlert('Failed to load appointments', 'danger');
+            }
+        }
+
+        function displayAppointments(appointments) {
+            if (appointments.length === 0) {
+                document.getElementById('appointmentsList').innerHTML = '<div class="alert alert-info">No appointments found</div>';
+                return;
+            }
+
+            let html = '';
+            appointments.forEach(apt => {
+                const statusClass = apt.status === 'confirmed' ? 'success' : apt.status === 'cancelled' ? 'danger' : apt.status === 'completed' ? 'info' : 'warning';
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6><i class="fas fa-user-md text-primary"></i> ${apt.doctor_name}</h6>
+                                    <p class="mb-1 small">${apt.specialization} | ${apt.hospital_name}</p>
+                                    <p class="mb-1"><strong>Date:</strong> ${new Date(apt.appointment_date).toLocaleDateString()}</p>
+                                    <p class="mb-1"><strong>Time:</strong> ${apt.appointment_time}</p>
+                                    <p class="mb-1"><strong>Fee:</strong> ₹${apt.consultation_fee}</p>
+                                    ${apt.symptoms ? `<p class="mb-1"><strong>Symptoms:</strong> ${apt.symptoms}</p>` : ''}
+                                </div>
+                                <div>
+                                    <span class="status-badge bg-${statusClass}">${apt.status.toUpperCase()}</span>
+                                    ${apt.status === 'booked' || apt.status === 'confirmed' ? `
+                                        <button class="btn btn-sm btn-danger mt-2" onclick="cancelAppointment(${apt.appointment_id})">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('appointmentsList').innerHTML = html;
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}api/users/appointments/${appointmentId}/cancel`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Appointment cancelled successfully', 'success');
+                    loadAppointments();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to cancel appointment', 'danger');
+            }
+        }
+
+        // Search Medicines
+        document.getElementById('searchMedicinesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const medicine_name = document.getElementById('medicine_name').value;
+            const city = document.getElementById('medicine_city').value;
+            const category = document.getElementById('medicine_category').value;
+
+            const queryParams = new URLSearchParams();
+            if (medicine_name) queryParams.append('medicine_name', medicine_name);
+            if (city) queryParams.append('city', city);
+            if (category) queryParams.append('category', category);
+
+            try {
+                const response = await fetch(`${API_URL}api/users/search/medicines?${queryParams}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    displayMedicines(data.data);
+                } else {
+                    document.getElementById('medicinesResults').innerHTML = '<div class="alert alert-warning">No medicines found</div>';
+                }
+            } catch (error) {
+                showAlert('Search failed', 'danger');
+            }
+        });
+
+        function displayMedicines(medicines) {
+            if (medicines.length === 0) {
+                document.getElementById('medicinesResults').innerHTML = '<div class="alert alert-info">No medicines found</div>';
+                return;
+            }
+
+            let html = '<div class="row">';
+            medicines.forEach(medicine => {
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-pills text-danger"></i> ${medicine.medicine_name}</h5>
+                                <p class="mb-1"><strong>Generic:</strong> ${medicine.generic_name || 'N/A'}</p>
+                                <p class="mb-1"><strong>Category:</strong> ${medicine.category || 'N/A'}</p>
+                                <p class="mb-1"><strong>Form:</strong> ${medicine.dosage_form || 'N/A'}</p>
+                                <p class="mb-1"><strong>Strength:</strong> ${medicine.strength || 'N/A'}</p>
+                                <p class="mb-1"><strong>Price:</strong> ₹${medicine.price}</p>
+                                <p class="mb-1"><strong>Stock:</strong> ${medicine.stock_quantity} units</p>
+                                <p class="mb-1"><strong>Pharmacy:</strong> ${medicine.pharmacy_name}</p>
+                                <p class="mb-1"><strong>Location:</strong> ${medicine.city}</p>
+                                ${medicine.requires_prescription ? '<span class="badge bg-warning">Rx Required</span>' : ''}
+                                <button class="btn btn-primary btn-sm mt-2" onclick="openOrderModal(${medicine.medicine_id}, '${medicine.medicine_name}', ${medicine.price}, ${medicine.stock_quantity}, '${medicine.pharmacy_name}', ${medicine.requires_prescription})">
+                                    <i class="fas fa-shopping-cart"></i> Order Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('medicinesResults').innerHTML = html;
+        }
+
+        function openOrderModal(medicineId, medicineName, price, stock, pharmacyName, requiresPrescription) {
+            document.getElementById('selectedMedicineId').value = medicineId;
+            document.getElementById('medicinePrice').value = price;
+            document.getElementById('maxStock').value = stock;
+            document.getElementById('orderQuantity').max = stock;
+            document.getElementById('orderQuantity').value = 1;
+            
+            document.getElementById('medicineInfo').innerHTML = `
+                <div class="alert alert-info">
+                    <strong>${medicineName}</strong><br>
+                    ${pharmacyName} | Price: ₹${price}<br>
+                    ${requiresPrescription ? '<span class="badge bg-warning">Prescription Required</span>' : ''}
+                </div>
+            `;
+            
+            calculateTotal();
+            new bootstrap.Modal(document.getElementById('orderMedicineModal')).show();
+        }
+
+        function calculateTotal() {
+            const quantity = parseInt(document.getElementById('orderQuantity').value) || 0;
+            const price = parseFloat(document.getElementById('medicinePrice').value) || 0;
+            const total = quantity * price;
+            document.getElementById('totalPrice').value = `₹${total.toFixed(2)}`;
+        }
+
+        document.getElementById('orderMedicineForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const quantity = parseInt(document.getElementById('orderQuantity').value);
+            const maxStock = parseInt(document.getElementById('maxStock').value);
+
+            if (quantity > maxStock) {
+                showAlert(`Only ${maxStock} units available`, 'warning');
+                return;
+            }
+
+            const formData = {
+                medicine_id: document.getElementById('selectedMedicineId').value,
+                quantity: quantity,
+                delivery_address: document.getElementById('deliveryAddress').value,
+                notes: document.getElementById('orderNotes').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}api/users/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('orderMedicineModal')).hide();
+                    document.getElementById('orderMedicineForm').reset();
+                    loadOrders();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to place order', 'danger');
+            }
+        });
+
+        async function loadOrders() {
+            const status = document.getElementById('orderFilter').value;
+            const queryParams = status ? `?status=${status}` : '';
+
+            try {
+                const response = await fetch(`${API_URL}api/users/orders${queryParams}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    displayOrders(data.data);
+                }
+            } catch (error) {
+                showAlert('Failed to load orders', 'danger');
+            }
+        }
+
+        function displayOrders(orders) {
+            if (orders.length === 0) {
+                document.getElementById('ordersList').innerHTML = '<div class="alert alert-info">No orders found</div>';
+                return;
+            }
+
+            let html = '';
+            orders.forEach(order => {
+                const statusClass = order.status === 'delivered' ? 'success' : order.status === 'cancelled' ? 'danger' : order.status === 'confirmed' ? 'info' : 'warning';
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6><i class="fas fa-pills text-danger"></i> ${order.medicine_name}</h6>
+                                    <p class="mb-1 small">${order.generic_name || ''} | ${order.dosage_form || ''} ${order.strength || ''}</p>
+                                    <p class="mb-1"><strong>Pharmacy:</strong> ${order.pharmacy_name}</p>
+                                    <p class="mb-1"><strong>Quantity:</strong> ${order.quantity} units</p>
+                                    <p class="mb-1"><strong>Total:</strong> ₹${order.total_price}</p>
+                                    <p class="mb-1"><strong>Delivery:</strong> ${order.delivery_address}</p>
+                                    <p class="mb-1 small text-muted">Ordered: ${new Date(order.created_at).toLocaleString()}</p>
+                                    ${order.prescription_required ? '<span class="badge bg-warning">Rx Required</span>' : ''}
+                                </div>
+                                <div>
+                                    <span class="status-badge bg-${statusClass}">${order.status.toUpperCase()}</span>
+                                    ${order.status === 'pending' ? `
+                                        <button class="btn btn-sm btn-danger mt-2" onclick="cancelOrder(${order.order_id})">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('ordersList').innerHTML = html;
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}api/users/orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Order cancelled successfully', 'success');
+                    loadOrders();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Failed to cancel order', 'danger');
+            }
+        }
+
+        // Load data when tabs are switched
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', (e) => {
+                if (e.target.dataset.bsTarget === '#appointments') {
+                    loadAppointments();
+                } else if (e.target.dataset.bsTarget === '#orders') {
+                    loadOrders();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Registration - MediConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        #alert-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        .alert-floating {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .card {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: none;
+        }
+
+        .card-body {
+            padding: 3rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #11998e;
+            box-shadow: 0 0 0 0.2rem rgba(17, 153, 142, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .register-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .register-icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-label i {
+            color: #11998e;
+            margin-right: 5px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .info-badge {
+            background: #e7f5f3;
+            color: #11998e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #11998e;
+        }
+
+        /* Accent link color moved from inline style */
+        .link-accent {
+            color: #11998e;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat"></i> MediConnect
+            </a>
+        </div>
+    </nav>
+
+    <div id="alert-container"></div>
+
+    <div class="container">
+        <div class="row justify-content-center mt-4 mb-5">
+            <div class="col-md-10 col-lg-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="register-icon">
+                            <i class="fas fa-hospital"></i>
+                        </div>
+                        <h3 class="text-center mb-3 fw-bold">Hospital Registration</h3>
+                        <p class="text-center text-muted mb-4">Register your hospital to manage doctors and schedules</p>
+                        
+                        <div class="info-badge">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> After registration, you'll be able to add doctors, manage their schedules, and make them searchable for patients.
+                        </div>
+
+                        <form id="registerForm">
+                            <div class="row">
+                                <!-- Hospital Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="hospital_name" class="form-label required-field">
+                                        <i class="fas fa-hospital"></i>Hospital Name
+                                    </label>
+                                    <input type="text" class="form-control" id="hospital_name" name="hospital_name" placeholder="Enter hospital name" required>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label required-field">
+                                        <i class="fas fa-envelope"></i>Official Email
+                                    </label>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="hospital@example.com" required>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label required-field">
+                                        <i class="fas fa-lock"></i>Password
+                                    </label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Minimum 6 characters" required minlength="6">
+                                    <small class="form-text text-muted">At least 6 characters</small>
+                                </div>
+
+                                <!-- Phone -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label required-field">
+                                        <i class="fas fa-phone"></i>Contact Number
+                                    </label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="10 digit number" pattern="[0-9]{10}" required>
+                                    <small class="form-text text-muted">Primary contact number</small>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="col-12 mb-3">
+                                    <label for="address" class="form-label required-field">
+                                        <i class="fas fa-map-marker-alt"></i>Complete Address
+                                    </label>
+                                    <textarea class="form-control" id="address" name="address" rows="2" placeholder="Enter complete hospital address" required></textarea>
+                                </div>
+
+                                <!-- City -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="city" class="form-label required-field">
+                                        <i class="fas fa-city"></i>City
+                                    </label>
+                                    <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" required>
+                                </div>
+
+                                <!-- State -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="state" class="form-label required-field">
+                                        <i class="fas fa-map"></i>State
+                                    </label>
+                                    <input type="text" class="form-control" id="state" name="state" placeholder="Enter state" required>
+                                </div>
+
+                                <!-- Pincode -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="pincode" class="form-label required-field">
+                                        <i class="fas fa-map-pin"></i>Pincode
+                                    </label>
+                                    <input type="text" class="form-control" id="pincode" name="pincode" placeholder="6 digits" pattern="[0-9]{6}" required>
+                                </div>
+
+                                <!-- Registration Number -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="registration_number" class="form-label">
+                                        <i class="fas fa-id-card"></i>Registration Number
+                                    </label>
+                                    <input type="text" class="form-control" id="registration_number" name="registration_number" placeholder="Hospital registration number">
+                                    <small class="form-text text-muted">Optional - Government registration ID</small>
+                                </div>
+
+                                <!-- Hospital Type -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="hospital_type" class="form-label">
+                                        <i class="fas fa-building"></i>Hospital Type
+                                    </label>
+                                    <select class="form-select" id="hospital_type" name="hospital_type">
+                                        <option value="">Select Type</option>
+                                        <option value="Government">Government</option>
+                                        <option value="Private">Private</option>
+                                        <option value="Multi-specialty">Multi-specialty</option>
+                                        <option value="Clinic">Clinic</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-success btn-lg w-100">Register Hospital</button>
+                                <div class="text-center mt-3">
+                                    <p class="mb-2">Already registered? <a href="/hospital-login" class="fw-bold text-decoration-none link-accent">Login here</a></p>
+                                    <a href="/" class="text-muted text-decoration-none">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Home
+                                    </a>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API Configuration
+        const API_URL = 'http://localhost:5000/'
+
+        // Show Alert Function
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Phone validation
+        function validatePhone(phone) {
+            const re = /^[0-9]{10}$/;
+            return re.test(phone);
+        }
+
+        // Pincode validation
+        function validatePincode(pincode) {
+            const re = /^[0-9]{6}$/;
+            return re.test(pincode);
+        }
+
+        // Register Form Submit Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value;
+            const pincode = document.getElementById('pincode').value;
+
+            // Validation
+            if (!validateEmail(email)) {
+                showAlert('Please enter a valid email address', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('Password must be at least 6 characters long', 'warning');
+                return;
+            }
+
+            if (!validatePhone(phone)) {
+                showAlert('Phone number must be 10 digits', 'warning');
+                return;
+            }
+
+            if (!validatePincode(pincode)) {
+                showAlert('Pincode must be 6 digits', 'warning');
+                return;
+            }
+
+            // Prepare form data
+            const formData = {
+                hospital_name: document.getElementById('hospital_name').value,
+                email: email,
+                password: password,
+                phone: phone,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                pincode: pincode,
+                registration_number: document.getElementById('registration_number').value,
+                hospital_type: document.getElementById('hospital_type').value
+            };
+
+            // Disable submit button to prevent double submission
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registering Hospital...';
+
+            try {
+                const response = await fetch(`${API_URL}api/hospitals/register`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Hospital registered successfully! Redirecting to login page...', 'success');
+                    
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/hospital-login';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Registration failed. Please try again.', 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert('Unable to connect to server. Please try again later.', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            
+            if (token && userType === 'hospital') {
+                showAlert('You are already registered and logged in. Redirecting...', 'info');
+                setTimeout(() => {
+                    window.location.href = '/hospital-dashboard';
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>

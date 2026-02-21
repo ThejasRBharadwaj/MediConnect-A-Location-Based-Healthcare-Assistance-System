@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediConnect - Healthcare Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .hero-section h1 {
+            color: white;
+        }
+
+        .hero-section .lead {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        footer {
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 40px 0;
+            }
+
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat"></i> MediConnect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation">
+                <span class="navbar-toggler-icon" aria-hidden="true"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Welcome to MediConnect</h1>
+            <p class="lead mb-5">Find doctors and medicines near you in real-time</p>
+            <div class="row justify-content-center">
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Users / Patients</h5>
+                            <p class="card-text">Search for doctors and medicines</p>
+                            <a href="/user-login" class="btn btn-primary">Login</a>
+                            <a href="/user-register" class="btn btn-outline-primary">Register</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hospital fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Hospitals</h5>
+                            <p class="card-text">Manage your doctors and schedules</p>
+                            <a href="/hospital-login" class="btn btn-success">Login</a>
+                            <a href="/hospital-register" class="btn btn-outline-success">Register</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-pills fa-3x text-danger mb-3"></i>
+                            <h5 class="card-title">Pharmacies</h5>
+                            <p class="card-text">Update medicine inventory</p>
+                            <a href="/pharmacy-login" class="btn btn-danger">Login</a>
+                            <a href="/pharmacy-register" class="btn btn-outline-danger">Register</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Why Choose MediConnect?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                        <h4>Real-Time Search</h4>
+                        <p>Find available doctors and medicines instantly</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-map-marker-alt fa-3x text-success mb-3"></i>
+                        <h4>Location-Based</h4>
+                        <p>Search by your city and area</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-clock fa-3x text-danger mb-3"></i>
+                        <h4>24/7 Access</h4>
+                        <p>Access healthcare information anytime</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">&copy; 2025 MediConnect. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
