@@ -1,0 +1,2 @@
+# MediConnect-A-Location-Based-Healthcare-Assistance-System
+MediConnect is a web-based application developed to help users locate nearby healthcare facilities such as hospitals and pharmacies based on their current location. The system aims to provide accurate, organized, and easily accessible healthcare information through a simple and user-friendly interface built using PEN stack along with HTML,CSS,JS.
